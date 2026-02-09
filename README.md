@@ -1,3 +1,3 @@
-# NPSF
+# VSCODE_test
 
-This repository contains code and examples for the noise preserving sharpening filter.
+This repository contains code and examples for learning how to use VS Code.
