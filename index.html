@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gaussian Filter Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Image Filtering Studio</p>
+          <h1>Gaussian Filter Lab</h1>
+          <p class="subhead">
+            Load an image from disk or a URL, then dial in the blur radius for
+            a real-time preview.
+          </p>
+        </div>
+        <div class="status" id="status">Waiting for an image.</div>
+      </header>
+
+      <section class="controls">
+        <div class="panel">
+          <label for="fileInput" class="control-label">Upload from disk</label>
+          <input id="fileInput" type="file" accept="image/*" />
+        </div>
+        <div class="panel">
+          <label for="urlInput" class="control-label">Load from URL</label>
+          <div class="row">
+            <input id="urlInput" type="url" placeholder="https://example.com/image.jpg" />
+            <button id="loadUrlBtn">Load</button>
+          </div>
+          <p class="hint">Tip: remote servers must allow CORS for browser access.</p>
+        </div>
+        <div class="panel">
+          <label class="control-label" for="kernelSize">Gaussian kernel size</label>
+          <div class="row">
+            <input id="kernelSize" type="range" min="1" max="31" step="2" value="9" />
+            <div class="pill" id="kernelLabel">9 x 9</div>
+          </div>
+          <div class="metrics">
+            <div>
+              <span class="metric-label">Sigma</span>
+              <span class="metric-value" id="sigmaLabel">1.5</span>
+            </div>
+            <div>
+              <span class="metric-label">Pixels</span>
+              <span class="metric-value" id="pixelLabel">0</span>
+            </div>
+          </div>
+          <div class="row">
+            <button id="resetBtn" class="ghost">Reset</button>
+            <button id="downloadBtn" class="primary" disabled>Download result</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="canvas-grid">
+        <div class="canvas-card">
+          <h2>Original</h2>
+          <canvas id="sourceCanvas"></canvas>
+        </div>
+        <div class="canvas-card">
+          <h2>Filtered</h2>
+          <canvas id="outputCanvas"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
