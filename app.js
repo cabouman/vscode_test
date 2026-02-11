@@ -3,6 +3,8 @@ const urlInput = document.getElementById('urlInput');
 const loadUrlBtn = document.getElementById('loadUrlBtn');
 const kernelSize = document.getElementById('kernelSize');
 const kernelLabel = document.getElementById('kernelLabel');
+const sharpenAmount = document.getElementById('sharpenAmount');
+const sharpenLabel = document.getElementById('sharpenLabel');
 const sigmaLabel = document.getElementById('sigmaLabel');
 const pixelLabel = document.getElementById('pixelLabel');
 const resetBtn = document.getElementById('resetBtn');
@@ -29,6 +31,10 @@ function formatKernel(size) {
   const sigma = Math.max(0.15, size / 6);
   sigmaLabel.textContent = sigma.toFixed(2);
   return sigma;
+}
+
+function formatSharpen(amount) {
+  sharpenLabel.textContent = `${amount.toFixed(1)}x`;
 }
 
 function updatePixelLabel() {
@@ -190,13 +196,43 @@ function gaussianBlur(imageData, size, sigma) {
   return new ImageData(output, width, height);
 }
 
+function sharpenImage(imageData, amount) {
+  if (amount <= 0) return imageData;
+
+  const { width, height, data } = imageData;
+  const output = new Uint8ClampedArray(data.length);
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const idx = (y * width + x) * 4;
+
+      for (let channel = 0; channel < 3; channel += 1) {
+        const center = data[idx + channel];
+        const left = data[(y * width + clamp(x - 1, 0, width - 1)) * 4 + channel];
+        const right = data[(y * width + clamp(x + 1, 0, width - 1)) * 4 + channel];
+        const top = data[(clamp(y - 1, 0, height - 1) * width + x) * 4 + channel];
+        const bottom = data[(clamp(y + 1, 0, height - 1) * width + x) * 4 + channel];
+
+        const sharpened = center * (1 + amount * 4) - amount * (left + right + top + bottom);
+        output[idx + channel] = clamp(Math.round(sharpened), 0, 255);
+      }
+
+      output[idx + 3] = data[idx + 3];
+    }
+  }
+
+  return new ImageData(output, width, height);
+}
+
 function runFilter() {
   if (!originalImageData || isProcessing) return;
 
   const size = Number(kernelSize.value);
   const sigma = formatKernel(size);
+  const sharpen = Number(sharpenAmount.value);
+  formatSharpen(sharpen);
 
-  if (size <= 1) {
+  if (size <= 1 && sharpen <= 0) {
     outputCtx.putImageData(originalImageData, 0, 0);
     currentImageData = originalImageData;
     return;
@@ -207,13 +243,15 @@ function runFilter() {
 
   requestAnimationFrame(() => {
     try {
-      const filtered = gaussianBlur(originalImageData, size, sigma);
+      const blurred = size > 1 ? gaussianBlur(originalImageData, size, sigma) : originalImageData;
+      const filtered = sharpen > 0 ? sharpenImage(blurred, sharpen) : blurred;
+
       outputCtx.putImageData(filtered, 0, 0);
       currentImageData = filtered;
       setStatus('Filter applied.');
     } catch (error) {
       console.error(error);
-      setStatus('Filtering failed. Try a smaller kernel size.');
+      setStatus('Filtering failed. Try smaller settings.');
     } finally {
       isProcessing = false;
     }
@@ -241,9 +279,16 @@ kernelSize.addEventListener('input', () => {
   runFilter();
 });
 
+sharpenAmount.addEventListener('input', () => {
+  formatSharpen(Number(sharpenAmount.value));
+  runFilter();
+});
+
 resetBtn.addEventListener('click', () => {
   kernelSize.value = 1;
+  sharpenAmount.value = 0;
   formatKernel(1);
+  formatSharpen(0);
   runFilter();
 });
 
@@ -256,5 +301,6 @@ downloadBtn.addEventListener('click', () => {
 });
 
 formatKernel(Number(kernelSize.value));
+formatSharpen(Number(sharpenAmount.value));
 updatePixelLabel();
 drawEmptyCanvases();
