@@ -127,3 +127,15 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Local editor/IDE settings
+.idea/
+.vscode/
+
+# macOS / Windows metadata
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.tmp
+*.swp
