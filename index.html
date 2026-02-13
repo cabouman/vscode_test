@@ -35,6 +35,14 @@
           <p class="hint">Tip: remote servers must allow CORS for browser access.</p>
         </div>
         <div class="panel">
+          <label for="objectInput" class="control-label">Insert Object</label>
+          <div class="row">
+            <input id="objectInput" type="text" placeholder="e.g. cat" />
+            <button id="insertBtn">Insert</button>
+          </div>
+          <p class="hint">Fetches a random image of the object and places it in the center.</p>
+        </div>
+        <div class="panel">
           <label class="control-label" for="kernelSize">Gaussian kernel size</label>
           <div class="row">
             <input id="kernelSize" type="range" min="1" max="31" step="2" value="9" />

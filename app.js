@@ -1,6 +1,8 @@
 const fileInput = document.getElementById('fileInput');
 const urlInput = document.getElementById('urlInput');
 const loadUrlBtn = document.getElementById('loadUrlBtn');
+const objectInput = document.getElementById('objectInput');
+const insertBtn = document.getElementById('insertBtn');
 const kernelSize = document.getElementById('kernelSize');
 const kernelLabel = document.getElementById('kernelLabel');
 const sharpenAmount = document.getElementById('sharpenAmount');
@@ -88,6 +90,49 @@ function applyImage(img) {
   }
 
   runFilter();
+}
+
+function insertObject(objectName) {
+  if (!originalImageData) {
+    setStatus('Please load a base image first.');
+    return;
+  }
+
+  setStatus(`Fetching image for "${objectName}"...`);
+  const keyword = encodeURIComponent(objectName);
+  // Using loremflickr with a random parameter to avoid caching
+  const url = `https://loremflickr.com/320/240/${keyword}?random=${Date.now()}`;
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    try {
+      // 1. Put the current original image back onto the source context
+      sourceCtx.putImageData(originalImageData, 0, 0);
+
+      // 2. Draw the new image in the center
+      const centerX = (sourceCanvas.width - img.width) / 2;
+      const centerY = (sourceCanvas.height - img.height) / 2;
+      sourceCtx.drawImage(img, centerX, centerY);
+
+      // 3. Update originalImageData to include this new object
+      originalImageData = sourceCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+      currentImageData = originalImageData;
+
+      // 4. Update output canvas
+      outputCtx.putImageData(originalImageData, 0, 0);
+
+      setStatus(`Inserted "${objectName}".`);
+      runFilter();
+    } catch (err) {
+      console.error(err);
+      setStatus('Error inserting object (likely CORS issue).');
+    }
+  };
+  img.onerror = () => {
+    setStatus(`Could not load image for "${objectName}".`);
+  };
+  img.src = url;
 }
 
 function loadImageFromFile(file) {
@@ -271,6 +316,22 @@ loadUrlBtn.addEventListener('click', () => {
 urlInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') {
     loadImageFromUrl(urlInput.value.trim());
+  }
+});
+
+insertBtn.addEventListener('click', () => {
+  const objectName = objectInput.value.trim();
+  if (objectName) {
+    insertObject(objectName);
+  }
+});
+
+objectInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    const objectName = objectInput.value.trim();
+    if (objectName) {
+      insertObject(objectName);
+    }
   }
 });
 

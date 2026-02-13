@@ -112,12 +112,14 @@ h1 {
 
 input[type='file'],
 input[type='url'],
+input[type='text'],
 input[type='range'],
 button {
   font-family: inherit;
 }
 
-input[type='url'] {
+input[type='url'],
+input[type='text'] {
   flex: 1;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
